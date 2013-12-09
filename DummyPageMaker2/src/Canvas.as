@@ -270,31 +270,16 @@ package
 		
 		private function onSave(e:Event):void 
 		{
-            //zip化
-            var zipOut:ZipOutput = new ZipOutput();
-            
-			var byteArrayList:Array/*ByteArray*/ = ImageManager.getInstance().byteArrayList;
-			
 			var extention:String = ImageManager.getInstance().format;
+			var n:int = ImageManager.getInstance().zipper.count;
 			
-			var n:int = byteArrayList.length;
-			for (var i:int = 0; i < n; i++) 
-			{
-				var fileData:ByteArray = byteArrayList[i];
-				zipOut.putNextEntry(new ZipEntry("image" + i + "." + extention));
-				zipOut.write(fileData);
-				zipOut.closeEntry();
-				byteArrayList[i].clear();
-			}
-			
-            zipOut.finish();
-            
             //ファイルリファレンスで保存
 			var defaultFileNames:String = extention + _sizeWidth.value + "x" + _sizeHeight.value + "x" + n;
 			defaultFileNames += "_" + (_photoRB0.selected?_keyword.text:"SolidColored");
 			defaultFileNames += ".zip";
+			
             var fileRef:FileReference = new FileReference();
-            fileRef.save(zipOut.byteArray, defaultFileNames );
+            fileRef.save(ImageManager.getInstance().zipper.getByteArray(), defaultFileNames );
 			fileRef.addEventListener(Event.COMPLETE, fileRef_complete);
 			fileRef.addEventListener(ProgressEvent.PROGRESS, fileRef_progress);
         }
@@ -302,7 +287,7 @@ package
 		private function fileRef_progress(event:ProgressEvent):void 
 		{
             var file:FileReference = FileReference(event.target);
-			var text:String = "zipping:" + String(event.bytesLoaded / event.bytesTotal).substr(0, 5);
+			var text:String = "Progress:" + String(event.bytesLoaded / event.bytesTotal).substr(0, 5);
 			ShieldManager.getInstance().text = text;
 		}
 		
@@ -312,6 +297,7 @@ package
 			_SiONSound.play();
 			ShieldManager.getInstance().visible = false;
 			_isGenerate = false;
+			ImageManager.getInstance().zipper.clear();
 		}
 	}
 	

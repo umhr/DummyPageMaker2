@@ -1,16 +1,11 @@
 package solidColored
 {
-	import by.blooddy.crypto.image.PNGEncoder;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.JPEGEncoderOptions;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
-	import flash.utils.ByteArray;
 	import flickr.PhotoManager;
-	import nochump.util.zip.ZipEntry;
-	import nochump.util.zip.ZipOutput;
 	import ui.ShieldManager;
 	/**
 	 * ...
@@ -25,7 +20,7 @@ package solidColored
 			return _instance;
 		}
 		
-		public var byteArrayList:Array/*ByteArray*/ = [];// new ByteArray();
+		public var zipper:Zipper = new Zipper();
 		private var _count:int;
 		private var _width:int;
 		private var _height:int;
@@ -44,7 +39,6 @@ package solidColored
 		}
 		
 		public function setImage(count:int, format:String, keyword:String, width:int, height:int, rgb:int, isGuide:Boolean, isPhoto:Boolean):void {
-			byteArrayList = [];
 			_count = count;
 			_rgb = rgb;
 			_isGuide = isGuide;
@@ -76,12 +70,13 @@ package solidColored
 		
 		private function start():void {
 			previewBitmap = null;
+			zipper.clear();
 			addEventListener(Event.ENTER_FRAME, enterFrame);
 		}
 		
 		private function enterFrame(e:Event):void 
 		{
-			var text:String = "Image Format Converting:" + byteArrayList.length + " / " + (byteArrayList.length + _count);
+			var text:String = "Image Format Converting:" + zipper.count + " / " + (zipper.count + _count);
 			ShieldManager.getInstance().text = text;
 			if (_count > 0) {
 				gene();
@@ -95,7 +90,7 @@ package solidColored
 			var n:int = Math.min(20, _count, a);
 			for (var i:int = 0; i < n; i++) 
 			{
-				var index:int = byteArrayList.length;
+				var index:int = zipper.count;
 				var text:String = _width + " x " + _height;
 				var bitmapData:BitmapData;
 				if (_isPhoto) {
@@ -104,17 +99,10 @@ package solidColored
 					bitmapData = ImageGenerator.getInstance().getImage(index, _width, _height, text, _rgb, _isGuide);
 				}
 				
-				var byteArray:ByteArray = new ByteArray();
-				if (_format == FORMAT_JPG) {
-					byteArray = bitmapData.encode(bitmapData.rect, new flash.display.JPEGEncoderOptions(90));
-				}else {
-					byteArray = by.blooddy.crypto.image.PNGEncoder.encode(bitmapData);
-				}
-				if(byteArrayList.length == 0){
+				if(zipper.count == 0){
 					previewBitmap = new Bitmap(bitmapData.clone());
 				}
-				
-				byteArrayList.push(byteArray);
+				zipper.setBitmapData(bitmapData, _format);
 				bitmapData = null;
 			}
 			

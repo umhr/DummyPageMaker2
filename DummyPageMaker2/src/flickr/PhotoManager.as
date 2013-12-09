@@ -157,7 +157,7 @@ package flickr
 			url += "&content_type=1&license=4&format=json&nojsoncallback=1";
 			
 			//trace(url);
-			_bulkLoader.add(url, {id:"searchResult", type:BulkLoader.TYPE_TEXT } );
+			_bulkLoader.add(url, {id:"searchResult", type:BulkLoader.TYPE_TEXT, context:new LoaderContext(true) } );
 			_bulkLoader.addEventListener(Event.COMPLETE, bulkLoader_complete);
 			_bulkLoader.start();
 			
@@ -231,9 +231,7 @@ package flickr
 				}
 			}
 			
-			//trace("----------------");
 			//Utils.dump(photoObject);
-			trace(result);
 			return result;
 		}
 		
